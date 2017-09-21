@@ -1,0 +1,187 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  creationTimestamp: null
+  generation: 1
+  labels:
+    name: ui-rc
+  name: ui-rc
+spec:
+  replicas: 1
+  selector:
+    name: ui-apps
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        name: ui-apps
+    spec:
+      containers:
+      - env:
+        - name: MYSQL_HOST
+          valueFrom:
+            configMapKeyRef:
+              key: MYSQL_HOST
+              name: harbor-ui-config
+        - name: MYSQL_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: MYSQL_PORT
+              name: harbor-ui-config
+        - name: MYSQL_USR
+          valueFrom:
+            configMapKeyRef:
+              key: MYSQL_USR
+              name: harbor-ui-config
+        - name: MYSQL_PWD
+          valueFrom:
+            configMapKeyRef:
+              key: MYSQL_PWD
+              name: harbor-ui-config
+        - name: REGISTRY_URL
+          valueFrom:
+            configMapKeyRef:
+              key: REGISTRY_URL
+              name: harbor-ui-config
+        - name: CONFIG_PATH
+          valueFrom:
+            configMapKeyRef:
+              key: CONFIG_PATH
+              name: harbor-ui-config
+        - name: HARBOR_REG_URL
+          valueFrom:
+            configMapKeyRef:
+              key: HARBOR_REG_URL
+              name: harbor-ui-config
+        - name: HARBOR_ADMIN_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              key: HARBOR_ADMIN_PASSWORD
+              name: harbor-ui-config
+        - name: HARBOR_URL
+          valueFrom:
+            configMapKeyRef:
+              key: HARBOR_URL
+              name: harbor-ui-config
+        - name: AUTH_MODE
+          valueFrom:
+            configMapKeyRef:
+              key: AUTH_MODE
+              name: harbor-ui-config
+        - name: LDAP_URL
+          valueFrom:
+            configMapKeyRef:
+              key: LDAP_URL
+              name: harbor-ui-config
+        - name: LDAP_SEARCH_DN
+          valueFrom:
+            configMapKeyRef:
+              key: LDAP_SEARCH_DN
+              name: harbor-ui-config
+        - name: LDAP_SEARCH_PWD
+          valueFrom:
+            configMapKeyRef:
+              key: LDAP_SEARCH_PWD
+              name: harbor-ui-config
+        - name: LDAP_BASE_DN
+          valueFrom:
+            configMapKeyRef:
+              key: LDAP_BASE_DN
+              name: harbor-ui-config
+        - name: LDAP_FILTER
+          valueFrom:
+            configMapKeyRef:
+              key: LDAP_FILTER
+              name: harbor-ui-config
+        - name: LDAP_UID
+          valueFrom:
+            configMapKeyRef:
+              key: LDAP_UID
+              name: harbor-ui-config
+        - name: LDAP_SCOPE
+          valueFrom:
+            configMapKeyRef:
+              key: LDAP_SCOPE
+              name: harbor-ui-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: LOG_LEVEL
+              name: harbor-ui-config
+        - name: UI_SECRET
+          valueFrom:
+            configMapKeyRef:
+              key: UI_SECRET
+              name: harbor-ui-config
+        - name: JOBSERVICE_SECRET
+          valueFrom:
+            configMapKeyRef:
+              key: JOBSERVICE_SECRET
+              name: harbor-ui-config
+        - name: GODEBUG
+          valueFrom:
+            configMapKeyRef:
+              key: GODEBUG
+              name: harbor-ui-config
+        - name: EXT_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              key: EXT_ENDPOINT
+              name: harbor-ui-config
+        - name: TOKEN_URL
+          valueFrom:
+            configMapKeyRef:
+              key: TOKEN_URL
+              name: harbor-ui-config
+        - name: SELF_REGISTRATION
+          valueFrom:
+            configMapKeyRef:
+              key: SELF_REGISTRATION
+              name: harbor-ui-config
+        - name: USE_COMPRESSED_JS
+          valueFrom:
+            configMapKeyRef:
+              key: USE_COMPRESSED_JS
+              name: harbor-ui-config
+        - name: VERIFY_REMOTE_CERT
+          valueFrom:
+            configMapKeyRef:
+              key: VERIFY_REMOTE_CERT
+              name: harbor-ui-config
+        - name: TOKEN_EXPIRATION
+          valueFrom:
+            configMapKeyRef:
+              key: TOKEN_EXPIRATION
+              name: harbor-ui-config
+        - name: EXT_REG_URL
+          valueFrom:
+            configMapKeyRef:
+              key: EXT_REG_URL
+              name: harbor-ui-config
+        image: vmware/harbor-ui:v1.2.0
+        imagePullPolicy: IfNotPresent
+        name: ui-app
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        volumeMounts:
+        - mountPath: /etc/ui
+          name: config
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: config
+            path: app.conf
+          - key: pkey
+            path: private_key.pem
+          name: harbor-ui-config
+        name: config
+status:
+  replicas: 0
