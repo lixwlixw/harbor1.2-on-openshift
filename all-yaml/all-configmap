@@ -1,0 +1,109 @@
+{
+    "kind": "List",
+    "apiVersion": "v1",
+    "metadata": {},
+    "items": [
+        {
+            "kind": "ConfigMap",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "harbor-jobservice-config",
+                "creationTimestamp": null
+            },
+            "data": {
+                "CONFIG_PATH": "/etc/jobservice/app.conf",
+                "EXT_ENDPOINT": "http://reg.mydomain.com",
+                "GODEBUG": "netdns=cgo",
+                "JOBSERVICE_SECRET": "vAfIy2kioIPCUMHb",
+                "LOG_DIR": "/var/log/jobs",
+                "LOG_LEVEL": "debug",
+                "MAX_JOB_WORKERS": "3",
+                "MYSQL_HOST": "mysql",
+                "MYSQL_PORT": "3306",
+                "MYSQL_PWD": "root123",
+                "MYSQL_USR": "root",
+                "REGISTRY_URL": "http://registry:5000",
+                "TOKEN_URL": "http://ui",
+                "UI_SECRET": "9EEYQcypRwZVBbE4",
+                "VERIFY_REMOTE_CERT": "on",
+                "config": "appname = jobservice\nrunmode = dev\n[dev]\nhttpport = 80\n"
+            }
+        },
+        {
+            "kind": "ConfigMap",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "harbor-mysql-config",
+                "creationTimestamp": null
+            },
+            "data": {
+                "MYSQL_ROOT_PASSWORD": "root123"
+            }
+        },
+        {
+            "kind": "ConfigMap",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "harbor-nginx-config",
+                "creationTimestamp": null
+            },
+            "data": {
+                "cert": "USE_HTTP\n",
+                "config": "worker_processes auto;\n\nevents {\n    worker_connections 1024;\n    use epoll;\n    multi_accept on;\n}\n\nhttp {\n    tcp_nodelay on;\n\n    # this is necessary for us to be able to disable request buffering in all cases\n    proxy_http_version 1.1;\n\n\n    upstream registry {\n        server registry:5000;\n    }\n\n    upstream ui {\n        server ui:80;\n    }\n\n\n    server {\n        listen 443 ssl;\n        server_name reg.mydomain.com;\n\n        # SSL\n        ssl_certificate /etc/nginx/https.crt;\n        ssl_certificate_key /etc/nginx/https.key;\n\n        # Recommendations from https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html\n        ssl_protocols TLSv1.1 TLSv1.2;\n        ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';\n        ssl_prefer_server_ciphers on;\n        ssl_session_cache shared:SSL:10m;\n\n        # disable any limits to avoid HTTP 413 for large image uploads\n        client_max_body_size 0;\n\n        # required to avoid HTTP 411: see Issue #1486 (https://github.com/docker/docker/issues/1486)\n        chunked_transfer_encoding on;\n\n        location / {\n            proxy_pass http://ui/;\n            proxy_set_header Host $http_host;\n            proxy_set_header X-Real-IP $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\n            # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.\n            proxy_set_header X-Forwarded-Proto $scheme;\n        \n            proxy_buffering off;\n            proxy_request_buffering off;\n        }\n\n        location /v1/ {\n            return 404;\n        }\n\n        location /v2/ {\n            proxy_pass http://registry/v2/;\n            proxy_set_header Host $http_host;\n            proxy_set_header X-Real-IP $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\n            # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.\n            proxy_set_header X-Forwarded-Proto $scheme;\n\n            proxy_buffering off;\n            proxy_request_buffering off;\n\n        }\n\n        location /service/ {\n            proxy_pass http://ui/service/;\n            proxy_set_header Host $http_host;\n            proxy_set_header X-Real-IP $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        \n            # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.\n            proxy_set_header X-Forwarded-Proto $scheme;\n        \n            proxy_buffering off;\n            proxy_request_buffering off;\n        }\n    }\n    server {\n        listen 80;\n        server_name reg.mydomain.com;\n\n        # disable any limits to avoid HTTP 413 for large image uploads\n        client_max_body_size 0;\n\n        # required to avoid HTTP 411: see Issue #1486 (https://github.com/docker/docker/issues/1486)\n        chunked_transfer_encoding on;\n\n        # rewrite ^/(.*) https://$server_name:443/$1 permanent;\n\n        location / {\n            proxy_pass http://ui/;\n            proxy_set_header Host $http_host;\n            proxy_set_header X-Real-IP $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\n            # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.\n            proxy_set_header X-Forwarded-Proto $scheme;\n        \n            proxy_buffering off;\n            proxy_request_buffering off;\n        }\n\n        location /v1/ {\n            return 404;\n        }\n\n        location /v2/ {\n            proxy_pass http://registry/v2/;\n            proxy_set_header Host $http_host;\n            proxy_set_header X-Real-IP $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\n            # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.\n            proxy_set_header X-Forwarded-Proto $scheme;\n\n            proxy_buffering off;\n            proxy_request_buffering off;\n\n        }\n\n        location /service/ {\n            proxy_pass http://ui/service/;\n            proxy_set_header Host $http_host;\n            proxy_set_header X-Real-IP $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        \n            # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.\n            proxy_set_header X-Forwarded-Proto $scheme;\n        \n            proxy_buffering off;\n            proxy_request_buffering off;\n        }\n    }\n}\n",
+                "pkey": "USE_HTTP\n"
+            }
+        },
+        {
+            "kind": "ConfigMap",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "harbor-registry-config",
+                "creationTimestamp": null
+            },
+            "data": {
+                "cert": "",
+                "config": "version: 0.1\nlog:\n  level: debug\n  fields:\n    service: registry\nstorage:\n  filesystem:\n    rootdirectory: /storage\n  cache:\n    layerinfo: inmemory\n  maintenance:\n    uploadpurging:\n      enabled: false\n  delete:\n    enabled: true\nhttp:\n  addr: :5000\n  secret: placeholder\n  debug:\n    addr: localhost:5001\nauth:\n  token:\n    issuer: registry-token-issuer\n    realm: http://reg.mydomain.com/service/token\n    rootcertbundle: /etc/docker/registry/root.crt\n    service: token-service\nnotifications:\n  endpoints:\n    - name: harbor\n      disabled: false\n      url: http://ui/service/notifications\n      timeout: 3000ms\n      threshold: 5\n      backoff: 1s\n"
+            }
+        },
+        {
+            "kind": "ConfigMap",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "harbor-ui-config",
+                "creationTimestamp": null
+            },
+            "data": {
+                "AUTH_MODE": "db_auth",
+                "CONFIG_PATH": "/etc/ui/app.conf",
+                "EXT_ENDPOINT": "http://reg.mydomain.com",
+                "EXT_REG_URL": "reg.mydomain.com",
+                "GODEBUG": "netdns=cgo",
+                "HARBOR_ADMIN_PASSWORD": "Harbor12345",
+                "HARBOR_REG_URL": "reg.mydomain.com",
+                "HARBOR_URL": "http://ui",
+                "JOBSERVICE_SECRET": "",
+                "LDAP_BASE_DN": "ou=people,dc=mydomain,dc=com",
+                "LDAP_FILTER": "",
+                "LDAP_SCOPE": "3",
+                "LDAP_SEARCH_DN": "",
+                "LDAP_SEARCH_PWD": "",
+                "LDAP_UID": "uid",
+                "LDAP_URL": "ldaps://ldap.mydomain.com",
+                "LOG_LEVEL": "debug",
+                "MYSQL_HOST": "mysql",
+                "MYSQL_PORT": "3306",
+                "MYSQL_PWD": "root123",
+                "MYSQL_USR": "root",
+                "REGISTRY_URL": "http://registry:5000",
+                "SELF_REGISTRATION": "on",
+                "TOKEN_EXPIRATION": "30",
+                "TOKEN_URL": "http://ui",
+                "UI_SECRET": "9EEYQcypRwZVBbE4",
+                "USE_COMPRESSED_JS": "",
+                "VERIFY_REMOTE_CERT": "on",
+                "config": "appname = registry\nrunmode = dev\n[lang]\ntypes = en-US|zh-CN\nnames = en-US|zh-CN\n[dev]\nhttpport = 80\n[mail]\nhost = smtp.mydomain.com\nport = 25\nusername = sample_admin@mydomain.com\npassword = abc\nfrom = admin \u003csample_admin@mydomain.com\u003e\nssl = false\n",
+                "pkey": "-----BEGIN RSA PRIVATE KEY-----\n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\n-----END RSA PRIVATE KEY-----\n"
+            }
+        }
+    ]
+}
