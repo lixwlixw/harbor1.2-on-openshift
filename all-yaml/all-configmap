@@ -7,6 +7,58 @@
             "kind": "ConfigMap",
             "apiVersion": "v1",
             "metadata": {
+                "name": "harbor-adminserver-config",
+                "creationTimestamp": null
+            },
+            "data": {
+                "ADMIRAL_URL": "NA",
+                "AUTH_MODE": "db_auth",
+                "CFG_EXPIRATION": "5",
+                "DATABASE_TYPE": "mysql",
+                "EMAIL_FROM": "admin \u003csample_admin@mydomain.com\u003e",
+                "EMAIL_HOST": "smtp.mydomain.com",
+                "EMAIL_IDENTITY": "",
+                "EMAIL_PORT": "25",
+                "EMAIL_PWD": "abc",
+                "EMAIL_SSL": "false",
+                "EMAIL_USR": "sample_admin@mydomain.com",
+                "EXT_ENDPOINT": "http://reg.mydomain.com",
+                "GODEBUG": "netdns=cgo",
+                "HARBOR_ADMIN_PASSWORD": "Harbor12345",
+                "JOBSERVICE_SECRET": "NpU6WShZagHQyFkC",
+                "JSON_CFG_STORE_PATH": "/etc/config/config.json",
+                "LDAP_BASE_DN": "ou=people,dc=mydomain,dc=com",
+                "LDAP_FILTER": "",
+                "LDAP_SCOPE": "3",
+                "LDAP_SEARCH_DN": "",
+                "LDAP_SEARCH_PWD": "",
+                "LDAP_TIMEOUT": "5",
+                "LDAP_UID": "uid",
+                "LDAP_URL": "ldaps://ldap.mydomain.com",
+                "LOG_LEVEL": "debug",
+                "MAX_JOB_WORKERS": "3",
+                "MYSQL_DATABASE": "registry",
+                "MYSQL_HOST": "mysql",
+                "MYSQL_PORT": "3306",
+                "MYSQL_PWD": "root123",
+                "MYSQL_USR": "root",
+                "PROJECT_CREATION_RESTRICTION": "everyone",
+                "REGISTRY_URL": "http://registry:5000",
+                "RESET": "false",
+                "SECRET_KEY": "3TA7VONyZoxOU8Ri",
+                "SELF_REGISTRATION": "on",
+                "TOKEN_EXPIRATION": "30",
+                "TOKEN_SERVICE_URL": "http://ui/service/token",
+                "TOKEN_URL": "http://ui",
+                "UI_SECRET": "uDpBKyyPVOZYI4Wc",
+                "VERIFY_REMOTE_CERT": "on",
+                "WITH_NOTARY": "False"
+            }
+        },
+        {
+            "kind": "ConfigMap",
+            "apiVersion": "v1",
+            "metadata": {
                 "name": "harbor-jobservice-config",
                 "creationTimestamp": null
             },
@@ -14,7 +66,7 @@
                 "CONFIG_PATH": "/etc/jobservice/app.conf",
                 "EXT_ENDPOINT": "http://reg.mydomain.com",
                 "GODEBUG": "netdns=cgo",
-                "JOBSERVICE_SECRET": "vAfIy2kioIPCUMHb",
+                "JOBSERVICE_SECRET": "NpU6WShZagHQyFkC",
                 "LOG_DIR": "/var/log/jobs",
                 "LOG_LEVEL": "debug",
                 "MAX_JOB_WORKERS": "3",
@@ -24,7 +76,7 @@
                 "MYSQL_USR": "root",
                 "REGISTRY_URL": "http://registry:5000",
                 "TOKEN_URL": "http://ui",
-                "UI_SECRET": "9EEYQcypRwZVBbE4",
+                "UI_SECRET": "uDpBKyyPVOZYI4Wc",
                 "VERIFY_REMOTE_CERT": "on",
                 "config": "appname = jobservice\nrunmode = dev\n[dev]\nhttpport = 80\n"
             }
@@ -48,9 +100,9 @@
                 "creationTimestamp": null
             },
             "data": {
-                "cert": "USE_HTTP\n",
+                "cert": "-----BEGIN CERTIFICATE-----\nMIIB+zCCAWQCCQDuSlcEMQGgYzANBgkqhkiG9w0BAQUFADBCMQswCQYDVQQGEwJY\nWDEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZhdWx0IENvbXBh\nbnkgTHRkMB4XDTE3MDkyMTAyNTE1OFoXDTI3MDkxOTAyNTE1OFowQjELMAkGA1UE\nBhMCWFgxFTATBgNVBAcMDERlZmF1bHQgQ2l0eTEcMBoGA1UECgwTRGVmYXVsdCBD\nb21wYW55IEx0ZDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA2eEkccgwTpzY\n2LhUuTom9tlQ5tTAamuOUg+672AN2V1Eftt41qUYFNXgRdcmlUKRbJeR3cGhpnvM\nATz7kk5Iox2nka99UpGr0i7RUmxHdH1xAitN1BrRwFcOKF74MYim2sqknmNh9wOH\n8lYLerdDUQJPtxORg87f8lxgBhEh1ycCAwEAATANBgkqhkiG9w0BAQUFAAOBgQAb\nsDlLcGgQ280h08wW5GTFhwhqQO8NahK0fONQcIuGDR8JdlkrNz0mSdoY1QUFkJAQ\n0Y4oh/fksZC6oMwrutk9+JeMR+ZrWS1asmlZ/0n2EXV43eEAscNwbzagnqi6kfgu\nz0zOgGI1SJ+ewkVfHKTc0z44hjUJR2Lz2ZZKjaggyQ==\n-----END CERTIFICATE-----\n",
                 "config": "worker_processes auto;\n\nevents {\n    worker_connections 1024;\n    use epoll;\n    multi_accept on;\n}\n\nhttp {\n    tcp_nodelay on;\n\n    # this is necessary for us to be able to disable request buffering in all cases\n    proxy_http_version 1.1;\n\n\n    upstream registry {\n        server registry:5000;\n    }\n\n    upstream ui {\n        server ui:80;\n    }\n\n\n    server {\n        listen 443 ssl;\n        server_name reg.mydomain.com;\n\n        # SSL\n        ssl_certificate /etc/nginx/https.crt;\n        ssl_certificate_key /etc/nginx/https.key;\n\n        # Recommendations from https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html\n        ssl_protocols TLSv1.1 TLSv1.2;\n        ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';\n        ssl_prefer_server_ciphers on;\n        ssl_session_cache shared:SSL:10m;\n\n        # disable any limits to avoid HTTP 413 for large image uploads\n        client_max_body_size 0;\n\n        # required to avoid HTTP 411: see Issue #1486 (https://github.com/docker/docker/issues/1486)\n        chunked_transfer_encoding on;\n\n        location / {\n            proxy_pass http://ui/;\n            proxy_set_header Host $http_host;\n            proxy_set_header X-Real-IP $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\n            # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.\n            proxy_set_header X-Forwarded-Proto $scheme;\n        \n            proxy_buffering off;\n            proxy_request_buffering off;\n        }\n\n        location /v1/ {\n            return 404;\n        }\n\n        location /v2/ {\n            proxy_pass http://registry/v2/;\n            proxy_set_header Host $http_host;\n            proxy_set_header X-Real-IP $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\n            # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.\n            proxy_set_header X-Forwarded-Proto $scheme;\n\n            proxy_buffering off;\n            proxy_request_buffering off;\n\n        }\n\n        location /service/ {\n            proxy_pass http://ui/service/;\n            proxy_set_header Host $http_host;\n            proxy_set_header X-Real-IP $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        \n            # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.\n            proxy_set_header X-Forwarded-Proto $scheme;\n        \n            proxy_buffering off;\n            proxy_request_buffering off;\n        }\n    }\n    server {\n        listen 80;\n        server_name reg.mydomain.com;\n\n        # disable any limits to avoid HTTP 413 for large image uploads\n        client_max_body_size 0;\n\n        # required to avoid HTTP 411: see Issue #1486 (https://github.com/docker/docker/issues/1486)\n        chunked_transfer_encoding on;\n\n        # rewrite ^/(.*) https://$server_name:443/$1 permanent;\n\n        location / {\n            proxy_pass http://ui/;\n            proxy_set_header Host $http_host;\n            proxy_set_header X-Real-IP $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\n            # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.\n            proxy_set_header X-Forwarded-Proto $scheme;\n        \n            proxy_buffering off;\n            proxy_request_buffering off;\n        }\n\n        location /v1/ {\n            return 404;\n        }\n\n        location /v2/ {\n            proxy_pass http://registry/v2/;\n            proxy_set_header Host $http_host;\n            proxy_set_header X-Real-IP $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\n            # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.\n            proxy_set_header X-Forwarded-Proto $scheme;\n\n            proxy_buffering off;\n            proxy_request_buffering off;\n\n        }\n\n        location /service/ {\n            proxy_pass http://ui/service/;\n            proxy_set_header Host $http_host;\n            proxy_set_header X-Real-IP $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        \n            # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.\n            proxy_set_header X-Forwarded-Proto $scheme;\n        \n            proxy_buffering off;\n            proxy_request_buffering off;\n        }\n    }\n}\n",
-                "pkey": "USE_HTTP\n"
+                "pkey": "-----BEGIN RSA PRIVATE KEY-----\nMIICXQIBAAKBgQDZ4SRxyDBOnNjYuFS5Oib22VDm1MBqa45SD7rvYA3ZXUR+23jW\npRgU1eBF1yaVQpFsl5HdwaGme8wBPPuSTkijHaeRr31SkavSLtFSbEd0fXECK03U\nGtHAVw4oXvgxiKbayqSeY2H3A4fyVgt6t0NRAk+3E5GDzt/yXGAGESHXJwIDAQAB\nAoGBAIQ+NQKiwT9V0ABqkXIDq9a0PHh+tXNiaPXB+nKEWKOQCpz81TFi72TmE8QQ\nPKjnyKCitrRkbJtCFKbDvuYkgczwwElO/VMl3EAJ53ltii7R7SAuY8ZXoGvlg/B4\nDW45/5LCKEsA+qYKhqdC15htuCupmfwSJC83mYOF/ac5dmuxAkEA8/IKucBC22ow\nrO2hoJ8QpRc6LxVVgyX4LzHMw+scRRI5l5vRgrFQ9a2CGcf6vMdhvdxhpzFT5jPw\nm0+sw2NTYwJBAOSlXDs9fd71sKf0ET9f3rpfnHufWG642XSQDlnysd/anqPBcksP\n04wNoSZtnrT8xNGgb/NYDnhjwJOORnCaMm0CQCj2owBwHYn0ufm/6Z0sOMJQNTAE\n2Bguvw9FwInBqDydA9jGjJbyqZKnsSodH6ilnm8gW7GUoe8NF8Eszuj8e9sCQQCo\n+92ymrvQcNzjBGtK31wJemh4pUgCbPOqRl2U9N2piDX+6RXDjCrZM6mKcTH+qWH9\nXAnhW482QuMtKtW8mvnxAkAbmsFIksabICjkojNbcdipY5xA9GLAveWLXVtyi1UG\nAoYYfWymDgVqW5Z1riRqm7Fy/yhW2owBCpO36yWSYaRB\n-----END RSA PRIVATE KEY-----\n"
             }
         },
         {
@@ -61,8 +113,8 @@
                 "creationTimestamp": null
             },
             "data": {
-                "cert": "",
-                "config": "version: 0.1\nlog:\n  level: debug\n  fields:\n    service: registry\nstorage:\n  filesystem:\n    rootdirectory: /storage\n  cache:\n    layerinfo: inmemory\n  maintenance:\n    uploadpurging:\n      enabled: false\n  delete:\n    enabled: true\nhttp:\n  addr: :5000\n  secret: placeholder\n  debug:\n    addr: localhost:5001\nauth:\n  token:\n    issuer: registry-token-issuer\n    realm: http://reg.mydomain.com/service/token\n    rootcertbundle: /etc/docker/registry/root.crt\n    service: token-service\nnotifications:\n  endpoints:\n    - name: harbor\n      disabled: false\n      url: http://ui/service/notifications\n      timeout: 3000ms\n      threshold: 5\n      backoff: 1s\n"
+                "cert": "-----BEGIN CERTIFICATE-----\nMIIFVzCCAz+gAwIBAgIJAIw8qH73vP87MA0GCSqGSIb3DQEBCwUAMEIxCzAJBgNV\nBAYTAlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQg\nQ29tcGFueSBMdGQwHhcNMTcwOTIxMDY0MDE2WhcNMjcwOTE5MDY0MDE2WjBCMQsw\nCQYDVQQGEwJYWDEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZh\ndWx0IENvbXBhbnkgTHRkMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA\nuBI53smHTiVJjo9t8X955urulnxXyiF0dg5jbTV6I6bAaTYB/ssH9/BYDW1bh1MO\nb0bC5npvP4jxOC46Gu4PJDZq7qH+2qC6CzlEx1pQIH3Q55spj0MeJVz04wW1PDg7\n3QG1RtSqy/VyC8Xfa2+eBN2KQDSaJW1OlbldIWUF6K/O0r/Cf1N2iIqcW032VTHX\n93I3nYMLWwT+VRN1slAQRlentRoG4nB50olWrXaUsG3KNUalxo2FKj6fkCm5hkGt\nF3d4WjFoEaniVmNRvYURnsWnyO9YttRhvx0GWWz0SDJEbRS8IKjoFltNIP3b1GpL\nsO6ZPHiRjPXrnZ2DDsQZ0Xuv7zhzhfMZ/2gejVin9bbMkhvN+wwRj3WOk19yA2Ye\nyGLBQ04MYPZlJixlF0n04wAQEUHxoOelFqo/vFHiyTYlnKodGpmkgdbOP3pwzE0p\nB+plvYLQty3bZMQKYUnFmXnQ78VVW+2KWOz4wL41y574CKG2WJrSp8wioT2IoR9s\nWlSp2LqxnQxLhCuU36sCG05N270O+zXK2iLL8rmvJLkt3uomPVg+wxegi5lJgr0T\npy39nGOirSv1YTq3KcfvmMrpZ3z05cfDd8iHItFmx6LHRA3JNsmZw8c3QcbI7zoY\nRe0LTMeipjZZ4zvgndWSuz0xDQeVMMuYTXE9rVM32IUCAwEAAaNQME4wHQYDVR0O\nBBYEFC4bP968odirXfQhP8wA3GwMccjpMB8GA1UdIwQYMBaAFC4bP968odirXfQh\nP8wA3GwMccjpMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQELBQADggIBAKWEhQGl\nEVAlpU4TEvENzX/Az8agHkBbTvxHc8m8xQcIN/GSa5TRHRYDiAcZaklLN3rHrQqG\n0TRrjl/jX09vH5uXRTRUzOsFbTtrot70abkxVhEVZA3c4Q8MIWNJDxALZqiBoBYP\nPui7wat6NRT5bS8RSgzOlTR68tEWPFFtQKZCC7BAf4tJ9h9CcllIzu14R5Fi7KXW\neNTnfZGHx88Z4c3toZTf2laSdYF36hJ5OhUCDF6CqdRT2LuSBKlJGpKXInzoo15C\n8wMuc86Hse1K8r8eHt1HsvAAmT7nFmPgC/NRvu7fVGouz8Ubyu1LYzkBp5qU4OZ6\nIizymf9OpFqEwPTciMmszDrr7Bs6rD9mvfh99cBbRlAFfmknAgV5vlkjvFE5V8F+\nikrSdz4TsodpNgzvITAhAnVZsFcXVmEckknE29wetRp6sgLKycBhLlkl2tshUYkC\nj3HVDXN/bVYDYZdf/wwIrm7Pw0KTJBiHunt12HzsQBShiHR0tuEiF89OoE4vLwcq\nvVNub/CVyq21uroOXiCvkROB+jM0WDhtWW+1B4GNw+LB+ScMRWN29qNsSEd1B5Gn\nGNKrcLKpI0JQAZPH7SA2GKddqO5R1BevUzJ8LL/Spy/Oa+EpCv5qEXHikOGA73AC\nUc54wLWB5UDyOUXZg4ByKJZuTmUL5+WzpSb4\n-----END CERTIFICATE----- \n",
+                "config": "version: 0.1\nlog:\n  level: debug\n  fields:\n    service: registry\nstorage:\n  filesystem:\n    rootdirectory: /storage\n  cache:\n    layerinfo: inmemory\n  maintenance:\n    uploadpurging:\n      enabled: false\n  delete:\n    enabled: true\nhttp:\n  addr: :5000\n  secret: placeholder\n  debug:\n    addr: localhost:5001\nauth:\n  token:\n    issuer: registry-token-issuer\n    realm: http://reg.mydomain.com/service/token\n    rootcertbundle: /etc/docker/registry/root.crt\n    service: token-service\nnotifications:\n  endpoints:\n    - name: harbor\n      disabled: false\n      url: http://ui/service/notifications\n      timeout: 9000ms\n      threshold: 5\n      backoff: 1s\n"
             }
         },
         {
@@ -98,11 +150,11 @@
                 "SELF_REGISTRATION": "on",
                 "TOKEN_EXPIRATION": "30",
                 "TOKEN_URL": "http://ui",
-                "UI_SECRET": "9EEYQcypRwZVBbE4",
+                "UI_SECRET": "uDpBKyyPVOZYI4Wc",
                 "USE_COMPRESSED_JS": "",
                 "VERIFY_REMOTE_CERT": "on",
                 "config": "appname = registry\nrunmode = dev\n[lang]\ntypes = en-US|zh-CN\nnames = en-US|zh-CN\n[dev]\nhttpport = 80\n[mail]\nhost = smtp.mydomain.com\nport = 25\nusername = sample_admin@mydomain.com\npassword = abc\nfrom = admin \u003csample_admin@mydomain.com\u003e\nssl = false\n",
-                "pkey": "-----BEGIN RSA PRIVATE KEY-----\n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\n-----END RSA PRIVATE KEY-----\n"
+                "pkey": "-----BEGIN RSA PRIVATE KEY-----\n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\n-----END RSA PRIVATE KEY-----\n"
             }
         }
     ]
